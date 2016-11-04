@@ -1,0 +1,114 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Gmap sample</title>
+    <style>
+                      html, body {
+                            height: 100%;
+                            margin: 0;
+                            padding: 0;
+                         ;
+                }
+
+                      #map {
+                            height: 100%;
+                         ;
+                }
+        /* END EXTER
+    </style>
+    <script>
+var map;
+var infoWindow;
+var service;
+var tokyo;
+
+function initMap() {
+
+    tokyo = { lat: 35.677175, lng: 139.747868 };
+  map = new google.maps.Map(document.getElementById('map'), {
+    center: tokyo,
+    zoom: 15,
+    styles: [{
+      stylers: [{ visibility: 'simplified' }]
+    }, {
+      elementType: 'labels',
+      stylers: [{ visibility: 'on' }]
+    }]
+  });
+
+  infoWindow = new google.maps.InfoWindow();
+  service = new google.maps.places.PlacesService(map);
+
+  // The idle event is a debounced event, so we can query & listen without
+  // throwing too many requests at the server.
+  map.addListener('idle', performSearch);
+}
+
+function performSearch() {
+
+    service.nearbySearch({
+        location: tokyo,
+        radius: 5000,
+        types: ['restaurant']
+    }, callback);
+
+    var drawingManager = new google.maps.drawing.DrawingManager();
+    drawingManager.setMap(map);
+
+    google.maps.event.addListener(drawingManager, 'circlecomplete', function (circle) {
+        var radius = circle.getRadius();
+    });
+
+    google.maps.event.addListener(drawingManager, 'overlaycomplete', function (event) {
+        if (event.type == google.maps.drawing.OverlayType.CIRCLE) {
+            var radius = event.overlay.getRadius();
+        }
+    });
+
+}
+
+function callback(results, status) {
+  if (status !== google.maps.places.PlacesServiceStatus.OK) {
+    console.error(status);
+    return;
+  }
+  for (var i = 0, result; result = results[i]; i++) {
+    addMarker(result);
+  }
+}
+
+function addMarker(place) {
+  var marker = new google.maps.Marker({
+    map: map,
+    position: place.geometry.location,
+    icon: {
+      url: 'http://maps.gstatic.com/mapfiles/circle.png',
+      anchor: new google.maps.Point(10, 10),
+      scaledSize: new google.maps.Size(10, 17)
+    }
+  });
+
+  google.maps.event.addListener(marker, 'click', function() {
+    service.getDetails(place, function(result, status) {
+      if (status !== google.maps.places.PlacesServiceStatus.OK) {
+        console.error(status);
+        return;
+      }
+      infoWindow.setContent(result.name);
+      infoWindow.open(map, marker);
+    });
+  });
+}
+
+    </script>
+</head>
+<body>
+    <div id="map"></div>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCLBa3OHZHWnUk4RNBROVaw6G3lXeT5Kpg&callback=initMap&signed_in=true&libraries=places,visualization" async defer>
+    </script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCLBa3OHZHWnUk4RNBROVaw6G3lXeT5Kpg&libraries=drawing">
+    </script>
+
+</body>
+</html>
